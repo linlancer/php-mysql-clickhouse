@@ -1,0 +1,16 @@
+{
+    "name": "linlancer/php-mysql-clickhouse",
+    "description": "sync database from mysql to clickhouse",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "linsen",
+            "email": "3003286703@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "krowinski/php-mysql-replication": "^6.2"
+    }
+}
