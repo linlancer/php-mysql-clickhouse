@@ -11,6 +11,20 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "krowinski/php-mysql-replication": "^6.2"
+        "krowinski/php-mysql-replication": "^6.2",
+        "smi2/phpclickhouse": "^1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LinLancer\\PhpMySQLClickhouse\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LinLancer\\PhpMySQLClickhouse\\Test\\": "tests/"
+        }
     }
 }
