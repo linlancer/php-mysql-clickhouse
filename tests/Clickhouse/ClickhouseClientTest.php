@@ -10,6 +10,7 @@ namespace LinLancer\PhpMySQLClickhouse\Test\Clickhouse;
 
 use ClickHouseDB\Statement;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
+use LinLancer\PhpMySQLClickhouse\Clickhouse\TableDefinitionParser;
 use PHPUnit\Framework\TestCase;
 
 class ClickhouseClientTest extends TestCase
@@ -38,13 +39,14 @@ class ClickhouseClientTest extends TestCase
         $clickhouse = $this->getClickhouse();
         $result = $clickhouse->query($sql);
         $this->assertInstanceOf(Statement::class, $result);
-        var_dump($result->rawData());
     }
 
     public function testGetTableDefinition()
     {
         $clickhouse = $this->getClickhouse();
-        $result = $clickhouse->getTableDefinition('test', 'hexin_product');
-        var_dump($result);
+        $result = $clickhouse->getTableDefinition('test', 'hexin_erp_product');
+        $this->assertInstanceOf(TableDefinitionParser::class, $result);
+        $fields = $result->getFields();
+        $this->assertNotEmpty($fields);
     }
 }

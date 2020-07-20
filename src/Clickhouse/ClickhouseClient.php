@@ -49,14 +49,30 @@ class ClickhouseClient
         return boolval($this->client->isExists($schema, $table));
     }
 
+    public function createDatabase($schema)
+    {
+        $sql = 'CREATE DATABASE IF NOT EXISTS %s';
+        return $this->query(sprintf($sql, $schema));
+    }
+
+    /**
+     * @param $schema
+     * @param $table
+     * @return TableDefinitionParser
+     */
     public function getTableDefinition($schema, $table)
     {
         $createTableSql = $this->client->database($schema)->showCreateTable($table);
-        $this->parseCreateTableSql($createTableSql);
+        return $this->parseCreateTableSql($createTableSql);
     }
 
+    /**
+     * @param $sql
+     * @return TableDefinitionParser
+     */
     private function parseCreateTableSql($sql)
     {
-
+        $parser = new TableDefinitionParser($sql);
+        return $parser;
     }
 }

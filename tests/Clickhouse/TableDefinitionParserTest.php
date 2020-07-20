@@ -16,7 +16,7 @@ class TableDefinitionParserTest extends TestCase
     public function getParser()
     {
         $sql = <<<SQL
-            CREATE TABLE test.hexin_product
+CREATE TABLE test.hexin_erp_product
 (
     `id` Int32, 
     `cate_id` Nullable(Int32), 
@@ -29,8 +29,8 @@ class TableDefinitionParserTest extends TestCase
     `parent_sku` Nullable(String), 
     `purchase_day` Nullable(Int32), 
     `purchaser` Nullable(String), 
-    `purchase_minprice` Nullable(String), 
-    `purchase_maxprice` Nullable(String), 
+    `purchase_minprice` Decimal(10, 2), 
+    `purchase_maxprice` Decimal(10, 2), 
     `product_image` Nullable(String), 
     `purchase_link` Nullable(String), 
     `is_electric` Nullable(Int8), 
@@ -44,24 +44,24 @@ class TableDefinitionParserTest extends TestCase
     `season` Nullable(String), 
     `apply_cname` Nullable(String), 
     `apply_ename` Nullable(String), 
-    `apply_price` Nullable(String), 
+    `apply_price` Decimal(10, 2), 
     `apply_code` Nullable(String), 
     `storage_id` Nullable(Int32), 
     `origin_country` Nullable(String), 
     `origin_country_code` Nullable(String), 
     `max_stock` Nullable(Int32), 
     `min_stock` Nullable(Int32), 
-    `cost_price` Nullable(String), 
-    `out_box_single_weight` Nullable(String), 
-    `out_box_height` Nullable(String), 
-    `out_box_length` Nullable(String), 
-    `out_box_width` Nullable(String), 
-    `out_box_gross_weight` Nullable(String), 
-    `box_single_weight` Nullable(String), 
-    `box_height` Nullable(String), 
-    `box_length` Nullable(String), 
-    `box_width` Nullable(String), 
-    `box_gross_weight` Nullable(String), 
+    `cost_price` Decimal(10, 2), 
+    `out_box_single_weight` Decimal(10, 2), 
+    `out_box_height` Decimal(10, 2), 
+    `out_box_length` Decimal(10, 2), 
+    `out_box_width` Decimal(10, 2), 
+    `out_box_gross_weight` Decimal(10, 2), 
+    `box_single_weight` Decimal(10, 2), 
+    `box_height` Decimal(10, 2), 
+    `box_length` Decimal(10, 2), 
+    `box_width` Decimal(10, 2), 
+    `box_gross_weight` Decimal(10, 2), 
     `checker` Nullable(String), 
     `check_status` Nullable(Int8), 
     `check_time` Nullable(Int32), 
@@ -114,31 +114,38 @@ SQL;
     }
     public function testGetField()
     {
-
+        $parser = $this->getParser();
+        $type = $parser->getColumnType('version');
+        $this->assertIsString($type);
     }
 
     public function testGetDatabase()
     {
-
+        $parser = $this->getParser();
+        $database = $parser->getDatabase();
+        $this->assertIsString($database);
     }
 
     public function testGetTable()
     {
-
+        $parser = $this->getParser();
+        $table = $parser->getTable();
+        $this->assertIsString($table);
     }
 
     public function testGetFields()
     {
-
+        $parser = $this->getParser();
+        $fields = $parser->getFields();
+        $this->assertIsArray($fields);
     }
 
     public function testParseToArray()
     {
         $parser = $this->getParser();
-        $database = $parser->getDatabase();
         $engine = $parser->getEngine();
-        $table = $parser->getTable();
-        $fields = $parser->getFields();
-        var_dump($fields);
+        $this->assertIsString($engine);
+
+
     }
 }

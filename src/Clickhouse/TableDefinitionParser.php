@@ -32,7 +32,7 @@ class TableDefinitionParser
 
     public function parseToArray()
     {
-        $reg = '/CREATE\s+TABLE\s+(IF NOT EXISTS\s+)?((?P<database>\w+)\.)?(?P<table>\w+)\s+(ON CLUSTER \w+\s+)?\n\((?P<fields>\s+`(.*))+\)\s+\nENGINE\s+=\s+(?P<engine>\w+)/s';
+        $reg = '/CREATE\s+TABLE\s+(IF NOT EXISTS\s+)?((?P<database>\w+)\.)?(?P<table>\w+)\s+(ON CLUSTER \w+\s+)?\(\s?(?P<fields>\s+`(.*))+\)\s+ENGINE\s+=\s+(?P<engine>\w+)/s';
         if (preg_match_all($reg, $this->rawDefinition, $match))
             return $match;
         return [];
