@@ -12,7 +12,6 @@ use Doctrine\Common\Cache\PredisCache;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
-use function foo\func;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
 use Predis\Client;
 

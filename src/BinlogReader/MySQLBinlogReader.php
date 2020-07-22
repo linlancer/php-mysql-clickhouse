@@ -9,12 +9,22 @@
 namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 
+use Doctrine\Common\Cache\Cache;
 use MySQLReplication\BinLog\BinLogCurrent;
 use MySQLReplication\Config\ConfigBuilder;
 use MySQLReplication\MySQLReplicationFactory;
 
 class MySQLBinlogReader
 {
+    /**
+     * @var array
+     */
+    private static $config;
+
+    /**
+     * @var Cache
+     */
+    private static $cache;
     /**
      * @var string
      */
@@ -79,5 +89,15 @@ class MySQLBinlogReader
         $binLogStream->registerSubscriber(new EventsSubscriber);
 
         $binLogStream->run();
+    }
+
+    public static function run(array $config)
+    {
+
+    }
+
+    private static function initConfigBuilder(array $config)
+    {
+
     }
 }

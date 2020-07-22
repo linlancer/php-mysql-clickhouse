@@ -9,7 +9,10 @@
 namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 
+use LinLancer\PhpMySQLClickhouse\Handler\DeleteRowHandler;
 use LinLancer\PhpMySQLClickhouse\Handler\InsertRowHandler;
+use LinLancer\PhpMySQLClickhouse\Handler\UpdateRowHandler;
+use MySQLReplication\Definitions\ConstEventsNames;
 use MySQLReplication\Event\DTO\EventDTO;
 use MySQLReplication\Event\EventSubscribers;
 
@@ -20,17 +23,20 @@ class EventsSubscriber extends EventSubscribers
      */
     public function allEvents(EventDTO $event): void
     {
-        // all events got __toString() implementation
-        if ($event->getType() !== 'heartbeat') {
-//            echo $event;
-            // all events got JsonSerializable implementation
-            //echo json_encode($event, JSON_PRETTY_PRINT);
-            (new InsertRowHandler($event))->parseEvent();
-//            echo 'Memory usage ' . round(memory_get_usage() / 1048576, 2) . ' MB' . PHP_EOL;
-            // save event for resuming it later
-            MySQLBinlogReader::save($event->getEventInfo()->getBinLogCurrent());
+        $eventType = $event->getType();
+        switch ($eventType) {
+            case ConstEventsNames::DELETE:
+                (new DeleteRowHandler($event))->handle();
+                break;
+            case ConstEventsNames::UPDATE:
+                (new UpdateRowHandler($event))->handle();
+                break;
+            case ConstEventsNames::WRITE:
+                (new InsertRowHandler($event))->handle();
+                break;
+            default:
+                break;
         }
-
-
+        MySQLBinlogReader::save($event->getEventInfo()->getBinLogCurrent());
     }
 }
