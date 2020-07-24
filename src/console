@@ -1,0 +1,3 @@
+#!/usr/bin/env -S-P/usr/local/bin:/usr/bin:${PATH} php
+<?php
+echo 'woshi yige xiao xigua';

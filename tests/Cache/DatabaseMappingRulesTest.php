@@ -19,6 +19,7 @@ class DatabaseMappingRulesTest extends TestCase
         $config = include __dir__.'/../../config/clickhouse.php';
         return new DatabaseMappingRules($config);
     }
+
     public function testGetDatabases()
     {
         $obj = $this->getObj();

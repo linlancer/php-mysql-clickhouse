@@ -8,30 +8,14 @@
 return [
     //mysql源数据库配置
     'mysql_database' => [
-        [
-            'host' => '192.168.66.33',
-            'port' => 3306,
-            'user' => 'reader',
-            'password' => 'reader',
-            //要同步的数据表 格式：database.table
-            'tables' => [
-                'clickhouse_source.clickhouse_test',
-            ],
+        'host' => '192.168.66.33',
+        'port' => 3306,
+        'user' => 'reader',
+        'password' => 'Ch_123456.',
+        //要同步的数据表 格式：database.table
+        'tables' => [
+            'clickhouse_source.clickhouse_test',
         ],
-        [
-            'host' => '192.168.66.100',
-            'port' => 3306,
-            'user' => 'root',
-            'password' => 'Hexin123.',
-            //要更新的数据库
-            'schemas' => [
-            ],
-            //要同步的数据表
-            'tables' => [
-
-            ],
-        ],
-
     ],
     //clickhouse 数据源
     'clickhouse_database' => [

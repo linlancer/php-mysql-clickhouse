@@ -16,31 +16,17 @@ use MySQLReplication\MySQLReplicationFactory;
 
 class MySQLBinlogReader
 {
-    /**
-     * @var array
-     */
-    private static $config;
+    const CACHE_KEY = 'database:binlog:position';
 
     /**
      * @var Cache
      */
     private static $cache;
-    /**
-     * @var string
-     */
-    private static $fileAndPath;
 
-    /**
-     * @return string
-     */
-    private static function getFileAndPath(): string
+    public static function setCache(Cache $cache)
     {
-        if (null === self::$fileAndPath) {
-            self::$fileAndPath = sys_get_temp_dir() . '/bin-log-replicator-last-position';
-        }
-        return self::$fileAndPath;
+        self::$cache = $cache;
     }
-
     /**
      * @param BinLogCurrent $binLogCurrent
      */
@@ -48,10 +34,7 @@ class MySQLBinlogReader
     {
         echo 'saving file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position' . PHP_EOL;
 
-        // can be redis/nosql/file - something fast!
-        // to speed up you can save every xxx time
-        // you can also use signal handler for ctrl + c exiting script to wait for last event
-        file_put_contents(self::getFileAndPath(), serialize($binLogCurrent));
+        self::$cache->save(self::CACHE_KEY, serialize($binLogCurrent));
     }
 
     /**
@@ -60,11 +43,11 @@ class MySQLBinlogReader
      */
     public static function startFromPosition(ConfigBuilder $builder): ConfigBuilder
     {
-        if (!is_file(self::getFileAndPath())) {
+        if (!self::$cache->fetch(self::CACHE_KEY)) {
             return $builder;
         }
         /** @var BinLogCurrent $binLogCurrent */
-        $binLogCurrent = unserialize(file_get_contents(self::getFileAndPath()));
+        $binLogCurrent = unserialize(self::$cache->fetch(self::CACHE_KEY));
 
         echo 'starting from file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position' . PHP_EOL;
 
@@ -91,7 +74,7 @@ class MySQLBinlogReader
         $binLogStream->run();
     }
 
-    public static function run(array $config)
+    public static function run(ConfigBuilder $config)
     {
 
     }
