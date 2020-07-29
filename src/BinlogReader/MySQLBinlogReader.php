@@ -20,13 +20,18 @@ use MySQLReplication\MySQLReplicationFactory;
 class MySQLBinlogReader
 {
     const CACHE_KEY = 'database:binlog:position';
-
+    /**
+     * @var self
+     */
     protected static $instance;
     /**
      * @var DatabaseMappingRules
      */
     protected static $rules;
-
+    /**
+     * @var array
+     */
+    protected static $config;
     /**
      * @var Cache
      */
@@ -154,6 +159,7 @@ class MySQLBinlogReader
      */
     public static function run(array $config, Cache $cache)
     {
+        self::$config = $config;
         $instance = self::getInstance();
         $instance->setCache($cache);
         $instance->initClickhouseClient($config);
@@ -204,11 +210,10 @@ class MySQLBinlogReader
     }
 
     /**
-     * @param array $config
-     * @param Cache $cache
+     * 更新表结构缓存
      */
-    private function updateTableCache(array $config, Cache $cache)
+    public function updateTableCache()
     {
-        self::$rules = new DatabaseMappingRules($config, $cache, self::$clickhouse);
+        self::$rules = new DatabaseMappingRules(self::$config, self::$cache, self::$clickhouse);
     }
 }

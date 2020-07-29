@@ -30,6 +30,8 @@ class UpdateRowHandler extends BaseEventHandler
             $change = [];
             $where = [];
             foreach ($before as $key => $beforeValue) {
+                if ($this->checkClickhouseColumn($this->db, $this->table, $key) === false)
+                    continue;
                 $sourceType = $table->getColumn($key)->getType()->getName();
                 if ($beforeValue !== $after[$key])
                     $change[$key] = $this->convertValue($after[$key], $sourceType);
@@ -37,7 +39,7 @@ class UpdateRowHandler extends BaseEventHandler
                     $where[$key] = $this->convertValue($before[$key], $sourceType);
             }
             $sql = $this->updateSql($this->db, $this->table, $change, $where);
-            $sqlGroup[] = $sql;
+            !empty($change) && $sqlGroup[] = $sql;
         }
         return $sqlGroup;
     }

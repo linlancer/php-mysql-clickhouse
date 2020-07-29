@@ -10,6 +10,7 @@ namespace LinLancer\PhpMySQLClickhouse\Handler;
 
 
 use LinLancer\PhpMySQLClickhouse\BinlogReader\MySQLBinlogReader;
+use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\TypeMapping;
 use MySQLReplication\Event\DTO\EventDTO;
 use MySQLReplication\Event\DTO\RowsDTO;
@@ -116,7 +117,12 @@ CLICKHOUSE_UPDATE_PATTERN;
     {
         return TypeMapping::convert($value, $sourceType);
     }
-    
+
+    /**
+     * clickhouse执行对应语句
+     * @param $sql
+     * @return bool|\ClickHouseDB\Statement
+     */
     public function clickhouseQuery($sql)
     {
         if (is_array($sql)) {
@@ -125,6 +131,41 @@ CLICKHOUSE_UPDATE_PATTERN;
             }
         } else {
             return $this->reader->getClickhouse()->query($sql);
+        }
+    }
+
+    /**
+     * 检查clickhouse中是否存在对应字段
+     * @param $db
+     * @param $table
+     * @param $column
+     * @return bool
+     */
+    public function checkClickhouseColumn($db, $table, $column)
+    {
+        list ($db, $table) = $this->mapToClickhouse($db, $table);
+        $table = $this->reader->getTableRules()->getClickhouseTable($db, $table);
+        return boolval($table->getColumnType($column));
+    }
+
+    public function mapToClickhouse($db, $table)
+    {
+        $rules = $this->reader->getTableRules()->getMapingRules();
+        if (!isset($rules[$db . '.' . $table])) {
+            return [$db, $table];
+        } else {
+            return explode('.', $rules[$db . '.' . $table]);
+        }
+    }
+
+    public function mapToMysql($db, $table)
+    {
+        $rules = $this->reader->getTableRules()->getMapingRules();
+        $rules = array_reverse($rules);
+        if (!isset($rules[$db . '.' . $table])) {
+            return [$db, $table];
+        } else {
+            return explode('.', $rules[$db . '.' . $table]);
         }
     }
 

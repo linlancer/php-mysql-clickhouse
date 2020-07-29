@@ -34,6 +34,9 @@ class EventsSubscriber extends EventSubscribers
             case ConstEventsNames::WRITE:
                 (new InsertRowHandler($event))->handle();
                 break;
+            case ConstEventsNames::QUERY:
+                MySQLBinlogReader::getInstance()->updateTableCache();
+                break;
             default:
                 break;
         }
