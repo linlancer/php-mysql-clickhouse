@@ -10,6 +10,7 @@ namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 
 use Doctrine\Common\Cache\Cache;
+use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
 use MySQLReplication\BinLog\BinLogCurrent;
 use MySQLReplication\Config\ConfigBuilder;
 use MySQLReplication\MySQLReplicationFactory;
@@ -18,15 +19,38 @@ class MySQLBinlogReader
 {
     const CACHE_KEY = 'database:binlog:position';
 
+    protected static $instance;
+
+    protected static $rules;
+
     /**
      * @var Cache
      */
     private static $cache;
 
-    public static function setCache(Cache $cache)
+    private function __construct()
+    {
+
+    }
+
+    private function __clone()
+    {
+        // TODO: Implement __clone() method.
+    }
+
+    private static function getInstance()
+    {
+        if (is_null(self::$instance))
+            self::$instance = new self;
+        return self::$instance;
+    }
+
+
+    public function setCache(Cache $cache)
     {
         self::$cache = $cache;
     }
+
     /**
      * @param BinLogCurrent $binLogCurrent
      */
@@ -41,7 +65,7 @@ class MySQLBinlogReader
      * @param ConfigBuilder $builder
      * @return ConfigBuilder
      */
-    public static function startFromPosition(ConfigBuilder $builder): ConfigBuilder
+    public function startFromPosition(ConfigBuilder $builder): ConfigBuilder
     {
         if (!self::$cache->fetch(self::CACHE_KEY)) {
             return $builder;
@@ -56,17 +80,10 @@ class MySQLBinlogReader
             ->withBinLogPosition($binLogCurrent->getBinLogPosition());
     }
 
-    public static function stream(ConfigBuilder $config)
+    public function stream(ConfigBuilder $config)
     {
         $binLogStream = new MySQLReplicationFactory(
-            self::startFromPosition($config)
-                ->withUser('root')
-                ->withHost('192.168.66.33')
-                ->withPort(3306)
-                ->withPassword('Hexin2007')
-                ->withDatabasesOnly(['clickhouse_source'])
-                ->withSlaveId(100)
-                ->withHeartbeatPeriod(2)
+            $this->startFromPosition($config)
                 ->build()
         );
         $binLogStream->registerSubscriber(new EventsSubscriber);
@@ -74,13 +91,38 @@ class MySQLBinlogReader
         $binLogStream->run();
     }
 
-    public static function run(ConfigBuilder $config)
+    public static function run(array $config, Cache $cache)
     {
-
+        $instance = self::getInstance();
+        $instance->setCache($cache);
+        $instance->updateTableCache($config, $cache);
+        $configBuilder = $instance->initConfigBuilder($config);
+        $instance->stream($configBuilder);
     }
 
-    private static function initConfigBuilder(array $config)
+    private function initConfigBuilder(array $config) :ConfigBuilder
     {
+        $builder = new ConfigBuilder();
+        $mysqlConfig = $config['mysql_database'];
+        $builder = $builder->withUser($mysqlConfig['user'])
+            ->withPort($mysqlConfig['port'])
+            ->withPassword($mysqlConfig['password'])
+            ->withHost($mysqlConfig['host'])
+            ->withHeartbeatPeriod(2);
+        $databases = array_map(function ($item) {
+            $unit = explode('.', $item);
+            return reset($unit);
+        }, $mysqlConfig['tables']);
+        $tables = array_map(function ($item) {
+            $unit = explode('.', $item);
+            return end($unit);
+        }, $mysqlConfig['tables']);
+        return $builder->withDatabasesOnly($databases)
+        ->withTablesOnly($tables);
+    }
 
+    private function updateTableCache(array $config, Cache $cache)
+    {
+        self::$rules = new DatabaseMappingRules($config, $cache);
     }
 }

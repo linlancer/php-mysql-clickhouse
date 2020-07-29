@@ -8,6 +8,7 @@
 
 namespace LinLancer\PhpMySQLClickhouse\Cache;
 
+use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Cache\PredisCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -15,6 +16,7 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
 use Predis\Client;
+use Prophecy\Doubler\CachedDoubler;
 
 class DatabaseMappingRules
 {
@@ -30,17 +32,33 @@ class DatabaseMappingRules
 
     protected $mapping = [];
 
-    public function __construct($config)
+    public function __construct($config, Cache $cache)
     {
         $this->config = $config;
-        $client = new Client($config['redis']);
-        $this->cache = new PredisCache($client);
+        $this->cache = $cache;
         $this->initMySQLDatabases();
         $this->mapping = $this->initMapping();
         $this->cache->save(self::MAPPING_CACHE_KEY, json_encode($this->mapping));
         $this->initClickhouseDatabase($this->mapping);
     }
 
+    public function getMysqlTable($schema, $table)
+    {
+        $table = $this->cache->fetch(self::MYSQL_CACHE_KEY . $schema . ':' . $table);
+        return json_decode($table, true);
+    }
+
+    public function getClickhouseTable($schema, $table)
+    {
+        $table = $this->cache->fetch(self::CLICKHOUSE_CACHE_KEY . $schema . ':' . $table);
+        return json_decode($table, true);
+    }
+
+    public function getMapingRules()
+    {
+        $rules = $this->cache->fetch(self::MAPPING_CACHE_KEY);
+        return json_decode($rules, true);
+    }
     /**
      * @return array
      */

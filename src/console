@@ -1,3 +1,15 @@
 #!/usr/bin/env -S-P/usr/local/bin:/usr/bin:${PATH} php
 <?php
-echo 'woshi yige xiao xigua';
+require_once __dir__.'/../vendor/autoload.php';
+
+use Predis\Client;
+use Doctrine\Common\Cache\PredisCache;
+use LinLancer\PhpMySQLClickhouse\BinlogReader\MySQLBinlogReader;
+
+
+$config = require_once __dir__.'/../config/clickhouse.php';
+
+$client = new Client($config['redis']);
+$cache = new PredisCache($client);
+
+MySQLBinlogReader::run($config, $cache);

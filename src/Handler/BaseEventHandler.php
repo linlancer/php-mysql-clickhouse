@@ -35,8 +35,6 @@ abstract class BaseEventHandler
             $this->db = $this->event->getTableMap()->getDatabase();
             $this->table = $this->event->getTableMap()->getTable();
         }
-
-        echo $this->event;
     }
 
     public abstract function handle();
