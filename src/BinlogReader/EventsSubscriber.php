@@ -26,15 +26,19 @@ class EventsSubscriber extends EventSubscribers
         $eventType = $event->getType();
         switch ($eventType) {
             case ConstEventsNames::DELETE:
+                echo '【start handling delete events】'.PHP_EOL;
                 (new DeleteRowHandler($event))->handle();
                 break;
             case ConstEventsNames::UPDATE:
+                echo '【start handling update events】'.PHP_EOL;
                 (new UpdateRowHandler($event))->handle();
                 break;
             case ConstEventsNames::WRITE:
+                echo '【start handling insert events】'.PHP_EOL;
                 (new InsertRowHandler($event))->handle();
                 break;
             case ConstEventsNames::QUERY:
+                echo '【fetch ddl and update cache soon】'.PHP_EOL;
                 MySQLBinlogReader::getInstance()->updateTableCache();
                 break;
             default:
