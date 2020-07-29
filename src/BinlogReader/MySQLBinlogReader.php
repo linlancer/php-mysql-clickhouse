@@ -9,8 +9,10 @@
 namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 
+use ClickHouseDB\Client;
 use Doctrine\Common\Cache\Cache;
 use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
+use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
 use MySQLReplication\BinLog\BinLogCurrent;
 use MySQLReplication\Config\ConfigBuilder;
 use MySQLReplication\MySQLReplicationFactory;
@@ -20,7 +22,9 @@ class MySQLBinlogReader
     const CACHE_KEY = 'database:binlog:position';
 
     protected static $instance;
-
+    /**
+     * @var DatabaseMappingRules
+     */
     protected static $rules;
 
     /**
@@ -28,27 +32,59 @@ class MySQLBinlogReader
      */
     private static $cache;
 
+    /**
+     * @var ClickhouseClient
+     */
+    private static $clickhouse;
+
     private function __construct()
     {
-
     }
 
     private function __clone()
     {
-        // TODO: Implement __clone() method.
     }
 
-    private static function getInstance()
+    /**
+     * @return MySQLBinlogReader
+     */
+    public static function getInstance()
     {
         if (is_null(self::$instance))
             self::$instance = new self;
         return self::$instance;
     }
 
-
+    /**
+     * @param Cache $cache
+     */
     public function setCache(Cache $cache)
     {
         self::$cache = $cache;
+    }
+
+    /**
+     * @return Cache
+     */
+    public function getCahce()
+    {
+        return self::$cache;
+    }
+
+    /**
+     * @return DatabaseMappingRules
+     */
+    public function getTableRules()
+    {
+        return self::$rules;
+    }
+
+    /**
+     * @return ClickhouseClient
+     */
+    public function getClickhouse()
+    {
+        return self::$clickhouse;
     }
 
     /**
@@ -80,6 +116,18 @@ class MySQLBinlogReader
             ->withBinLogPosition($binLogCurrent->getBinLogPosition());
     }
 
+    /**
+     * @param ConfigBuilder $config
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \MySQLReplication\BinLog\BinLogException
+     * @throws \MySQLReplication\BinaryDataReader\BinaryDataReaderException
+     * @throws \MySQLReplication\Config\ConfigException
+     * @throws \MySQLReplication\Exception\MySQLReplicationException
+     * @throws \MySQLReplication\Gtid\GtidException
+     * @throws \MySQLReplication\JsonBinaryDecoder\JsonBinaryDecoderException
+     * @throws \MySQLReplication\Socket\SocketException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function stream(ConfigBuilder $config)
     {
         $binLogStream = new MySQLReplicationFactory(
@@ -91,15 +139,33 @@ class MySQLBinlogReader
         $binLogStream->run();
     }
 
+    /**
+     * @param array $config
+     * @param Cache $cache
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \MySQLReplication\BinLog\BinLogException
+     * @throws \MySQLReplication\BinaryDataReader\BinaryDataReaderException
+     * @throws \MySQLReplication\Config\ConfigException
+     * @throws \MySQLReplication\Exception\MySQLReplicationException
+     * @throws \MySQLReplication\Gtid\GtidException
+     * @throws \MySQLReplication\JsonBinaryDecoder\JsonBinaryDecoderException
+     * @throws \MySQLReplication\Socket\SocketException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public static function run(array $config, Cache $cache)
     {
         $instance = self::getInstance();
         $instance->setCache($cache);
+        $instance->initClickhouseClient($config);
         $instance->updateTableCache($config, $cache);
         $configBuilder = $instance->initConfigBuilder($config);
         $instance->stream($configBuilder);
     }
 
+    /**
+     * @param array $config
+     * @return ConfigBuilder
+     */
     private function initConfigBuilder(array $config) :ConfigBuilder
     {
         $builder = new ConfigBuilder();
@@ -121,8 +187,28 @@ class MySQLBinlogReader
         ->withTablesOnly($tables);
     }
 
+    /**
+     * @param $config
+     */
+    private function initClickhouseClient($config)
+    {
+        $clickhouseConfig = $config['clickhouse_database'];
+        $config = [
+            'host' => $clickhouseConfig['host'],
+            'port' => $clickhouseConfig['port'],
+            'username' => $clickhouseConfig['user'],
+            'password' => $clickhouseConfig['password']
+        ];
+
+        self::$clickhouse = new ClickhouseClient($config);
+    }
+
+    /**
+     * @param array $config
+     * @param Cache $cache
+     */
     private function updateTableCache(array $config, Cache $cache)
     {
-        self::$rules = new DatabaseMappingRules($config, $cache);
+        self::$rules = new DatabaseMappingRules($config, $cache, self::$clickhouse);
     }
 }

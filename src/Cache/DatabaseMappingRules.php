@@ -9,14 +9,12 @@
 namespace LinLancer\PhpMySQLClickhouse\Cache;
 
 use Doctrine\Common\Cache\Cache;
-use Doctrine\Common\Cache\PredisCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
-use Predis\Client;
-use Prophecy\Doubler\CachedDoubler;
+use LinLancer\PhpMySQLClickhouse\Clickhouse\TableDefinitionParser;
 
 class DatabaseMappingRules
 {
@@ -30,30 +28,46 @@ class DatabaseMappingRules
 
     protected $cache;
 
+    protected $client;
+
     protected $mapping = [];
 
-    public function __construct($config, Cache $cache)
+    public function __construct($config, Cache $cache, ClickhouseClient $client)
     {
         $this->config = $config;
         $this->cache = $cache;
+        $this->client = $client;
         $this->initMySQLDatabases();
         $this->mapping = $this->initMapping();
         $this->cache->save(self::MAPPING_CACHE_KEY, json_encode($this->mapping));
         $this->initClickhouseDatabase($this->mapping);
     }
 
+    /**
+     * @param $schema
+     * @param $table
+     * @return Table
+     */
     public function getMysqlTable($schema, $table)
     {
         $table = $this->cache->fetch(self::MYSQL_CACHE_KEY . $schema . ':' . $table);
-        return json_decode($table, true);
+        return unserialize($table);
     }
 
+    /**
+     * @param $schema
+     * @param $table
+     * @return TableDefinitionParser
+     */
     public function getClickhouseTable($schema, $table)
     {
         $table = $this->cache->fetch(self::CLICKHOUSE_CACHE_KEY . $schema . ':' . $table);
-        return json_decode($table, true);
+        return unserialize($table);
     }
 
+    /**
+     * @return array
+     */
     public function getMapingRules()
     {
         $rules = $this->cache->fetch(self::MAPPING_CACHE_KEY);
@@ -83,13 +97,6 @@ class DatabaseMappingRules
      */
     public function initClickhouseDatabase($mappingRules)
     {
-        $clickhouseConfig = $this->config['clickhouse_database'];
-        $config = [
-            'host' => $clickhouseConfig['host'],
-            'port' => $clickhouseConfig['port'],
-            'username' => $clickhouseConfig['user'],
-            'password' => $clickhouseConfig['password']
-        ];
         $mysqlDatabaseConfig = $this->config['mysql_database'];
         $sourceConfig = [
             'host' => $mysqlDatabaseConfig['host'],
@@ -97,7 +104,7 @@ class DatabaseMappingRules
             'username' => $mysqlDatabaseConfig['user'],
             'password' => $mysqlDatabaseConfig['password']
         ];
-        $clickhouseClient = new ClickhouseClient($config);
+        $clickhouseClient = $this->client;
         $this->checkClickhouseTables($clickhouseClient, $mappingRules, $sourceConfig);
     }
 

@@ -14,6 +14,25 @@ class InsertRowHandler extends BaseEventHandler
 
     public function handle()
     {
-        // TODO: Implement handle() method.
+        $values = $this->event->getValues();
+        $sql = $this->parseSql($values);
+        $this->clickhouseQuery($sql);
+    }
+
+    private function parseSql(array $values)
+    {
+        $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
+
+        $dataGroup = [];
+        foreach ($values as $row) {
+            $data = [];
+            foreach ($row as $key => $value) {
+                $sourceType = $table->getColumn($key)->getType()->getName();
+                $data[$key] = $this->convertValue($value, $sourceType);
+            }
+
+            $dataGroup[] = $data;
+        }
+        return $this->insertSql($this->db, $this->table, $dataGroup);
     }
 }

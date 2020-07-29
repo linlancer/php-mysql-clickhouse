@@ -9,6 +9,8 @@
 namespace LinLancer\PhpMySQLClickhouse\Clickhouse;
 
 
+use Doctrine\DBAL\Types\Types;
+
 class TypeMapping
 {
     const MYSQL_BIT = 'bit';
@@ -53,7 +55,7 @@ class TypeMapping
     const CLICKHOUSE_DECIMAL = 'Decimal';
 
     const MAPPING = [
-        self::MYSQL_BIT => self::CLICKHOUSE_BOOLEAN,
+        Types::BOOLEAN => self::CLICKHOUSE_BOOLEAN,
         self::MYSQL_TINYINT => self::CLICKHOUSE_INT8,
         self::MYSQL_SMALLINT => self::CLICKHOUSE_INT16,
         self::MYSQL_MEDIUMINT => self::CLICKHOUSE_INT32,
@@ -76,9 +78,34 @@ class TypeMapping
         self::MYSQL_JSON => self::CLICKHOUSE_ARRAY,
     ];
 
-    public static function convert($source)
+    public static function convert($value, $type)
     {
-
+        switch ($type) {
+            case Types::DATE_MUTABLE:
+                $value = sprintf('toDateOrNull(\'%s\')', $value);
+                break;
+            case Types::DATETIME_MUTABLE:
+                $value = sprintf('toDateTimeOrNull(\'%s\')', $value);
+                break;
+            case Types::STRING:
+            case Types::DECIMAL:
+            case Types::TEXT:
+                $value = sprintf('\'%s\'', $value);
+                break;
+            case Types::BIGINT:
+            case Types::INTEGER:
+            case Types::SMALLINT:
+            case Types::BOOLEAN:
+                $value = intval($value);
+                break;
+            case Types::FLOAT:
+                $value = floatval($value);
+                break;
+            case Types::JSON:
+            default:
+                break;
+        }
+        return $value;
     }
 
 }

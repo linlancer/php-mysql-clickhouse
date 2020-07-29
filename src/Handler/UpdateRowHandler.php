@@ -13,6 +13,33 @@ class UpdateRowHandler extends BaseEventHandler
 {
     public function handle()
     {
-        // TODO: Implement handle() method.
+        $values = $this->event->getValues();
+        $sql = $this->parseSql($values);
+        $this->clickhouseQuery($sql);
     }
+
+    private function parseSql(array $values)
+    {
+        $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
+        $primaryKey = $table->getPrimaryKey()->getColumns();
+        $primaryKeyName = reset($primaryKey);
+        $sqlGroup = [];
+        foreach ($values as $value) {
+            $before = $value['before'];
+            $after = $value['after'];
+            $change = [];
+            $where = [];
+            foreach ($before as $key => $beforeValue) {
+                $sourceType = $table->getColumn($key)->getType()->getName();
+                if ($beforeValue !== $after[$key])
+                    $change[$key] = $this->convertValue($after[$key], $sourceType);
+                if ($primaryKeyName == $key)
+                    $where[$key] = $this->convertValue($before[$key], $sourceType);
+            }
+            $sql = $this->updateSql($this->db, $this->table, $change, $where);
+            $sqlGroup[] = $sql;
+        }
+        return $sqlGroup;
+    }
+
 }
