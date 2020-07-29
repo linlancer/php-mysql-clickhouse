@@ -144,8 +144,8 @@ CLICKHOUSE_UPDATE_PATTERN;
     public function checkClickhouseColumn($db, $table, $column)
     {
         list ($db, $table) = $this->mapToClickhouse($db, $table);
-        $table = $this->reader->getTableRules()->getClickhouseTable($db, $table);
-        return boolval($table->getColumnType($column));
+        $tableDetail = $this->reader->getTableRules()->getClickhouseTable($db, $table);
+        return boolval($tableDetail->getColumnType($column));
     }
 
     public function mapToClickhouse($db, $table)

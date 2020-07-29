@@ -66,11 +66,11 @@ class TableDefinitionParser
     private function parseFields()
     {
         $fields = $this->arrayDefinition['fields'][0] ?? '';
-        $fieldsArr = explode(PHP_EOL, $fields);
+        $fieldsArr = explode("\n", $fields);
         $fieldsArr = array_filter($fieldsArr);
         foreach ($fieldsArr as $field) {
             $field = substr(trim($field), 0, -1);
-            $reg = '/`(?P<column>\w+)`\s+(?P<type>[\w\(\),]+)/';
+            $reg = '/`(?P<column>\w+)`\s+(?P<type>[\w\(\)]+),?/';
             if (preg_match_all($reg, $field, $match)) {
                 $this->fields[$match['column'][0]] = $match['type'][0];
             }

@@ -8,8 +8,11 @@
 
 namespace LinLancer\PhpMySQLClickhouse\Test\Cache;
 
+use Doctrine\Common\Cache\PredisCache;
 use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
+use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
 use PHPUnit\Framework\TestCase;
+use Predis\Client;
 
 class DatabaseMappingRulesTest extends TestCase
 {
@@ -17,7 +20,18 @@ class DatabaseMappingRulesTest extends TestCase
     public function getObj()
     {
         $config = include __dir__.'/../../config/clickhouse.php';
-        return new DatabaseMappingRules($config);
+        $client = new Client($config['redis']);
+        $cache = new PredisCache($client);
+        $clickhouseConfig = $config['clickhouse_database'];
+        $conf = [
+            'host' => $clickhouseConfig['host'],
+            'port' => $clickhouseConfig['port'],
+            'username' => $clickhouseConfig['user'],
+            'password' => $clickhouseConfig['password']
+        ];
+
+        $client = new ClickhouseClient($conf);
+        return new DatabaseMappingRules($config, $cache, $client);
     }
 
     public function testGetDatabases()

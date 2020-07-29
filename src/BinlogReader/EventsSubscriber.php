@@ -14,6 +14,7 @@ use LinLancer\PhpMySQLClickhouse\Handler\InsertRowHandler;
 use LinLancer\PhpMySQLClickhouse\Handler\UpdateRowHandler;
 use MySQLReplication\Definitions\ConstEventsNames;
 use MySQLReplication\Event\DTO\EventDTO;
+use MySQLReplication\Event\DTO\QueryDTO;
 use MySQLReplication\Event\EventSubscribers;
 
 class EventsSubscriber extends EventSubscribers
@@ -38,8 +39,14 @@ class EventsSubscriber extends EventSubscribers
                 (new InsertRowHandler($event))->handle();
                 break;
             case ConstEventsNames::QUERY:
-                echo '【fetch ddl and update cache soon】'.PHP_EOL;
-                MySQLBinlogReader::getInstance()->updateTableCache();
+                /**
+                 * @var QueryDTO $event
+                 */
+                $query = $event->getQuery();
+                if (stripos($query, 'BEGIN') !== 0) {
+                    echo '【fetch ddl and update cache soon】'.PHP_EOL;
+                    MySQLBinlogReader::getInstance()->updateTableCache();
+                }
                 break;
             default:
                 break;
