@@ -24,14 +24,6 @@ return [
         'user' => 'default',
         'password' => '',
     ],
-    //要更新的数据库
-    'schemas' => [
-        'clickhouse_source',
-    ],
-    //要同步的数据表
-    'tables' => [
-        'clickhouse_test',//如果多个库中含有相同表名 加入数据库名以区分
-    ],
     /**
      * 如果要指定源表更新到目标表的话 在这里指定映射 更复杂的映射
      * 这里键名为源表  键值为实现MySQLTableInterface接口的类名
