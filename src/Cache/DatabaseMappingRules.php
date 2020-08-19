@@ -62,7 +62,10 @@ class DatabaseMappingRules
     public function getClickhouseTable($schema, $table)
     {
         $table = $this->cache->fetch(self::CLICKHOUSE_CACHE_KEY . $schema . ':' . $table);
-        return unserialize($table);
+        $obj = unserialize($table);
+        if ($obj === false)
+            throw new \Exception('Couldn\'t found cache key :' . self::CLICKHOUSE_CACHE_KEY . $schema . ':' . $table);
+        return $obj;
     }
 
     /**

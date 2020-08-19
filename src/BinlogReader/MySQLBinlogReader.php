@@ -97,7 +97,7 @@ class MySQLBinlogReader
      */
     public static function save(BinLogCurrent $binLogCurrent): void
     {
-        echo 'saving file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position' . PHP_EOL;
+//        echo 'saving file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position' . PHP_EOL;
 
         self::$cache->save(self::CACHE_KEY, serialize($binLogCurrent));
     }
@@ -163,7 +163,7 @@ class MySQLBinlogReader
         $instance = self::getInstance();
         $instance->setCache($cache);
         $instance->initClickhouseClient($config);
-        $instance->updateTableCache($config, $cache);
+        $instance->updateTableCache();
         $configBuilder = $instance->initConfigBuilder($config);
         $instance->stream($configBuilder);
     }
