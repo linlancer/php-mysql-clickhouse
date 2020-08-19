@@ -15,7 +15,7 @@ class DeleteRowHandler extends BaseEventHandler
     {
         $values = $this->event->getValues();
         $sql = $this->parseSql($values);
-        $this->clickhouseQuery($sql);
+        $sql && $this->clickhouseQuery($sql);
     }
 
     private function parseSql(array $values)
@@ -34,8 +34,8 @@ class DeleteRowHandler extends BaseEventHandler
                     $where[$key] = $this->convertValue($value, $sourceType);
             }
             $sql = $this->deleteSql($this->db, $this->table, $where);
-            $sqlGroup[] = $sql;
+            !empty($where) && $sqlGroup[] = $sql;
         }
-        return $sqlGroup;
+        return empty($sqlGroup) ? false : $sqlGroup;
     }
 }

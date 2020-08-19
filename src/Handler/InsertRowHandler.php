@@ -16,7 +16,7 @@ class InsertRowHandler extends BaseEventHandler
     {
         $values = $this->event->getValues();
         $sql = $this->parseSql($values);
-        $this->clickhouseQuery($sql);
+        $sql && $this->clickhouseQuery($sql);
     }
 
     private function parseSql(array $values)
@@ -35,6 +35,6 @@ class InsertRowHandler extends BaseEventHandler
 
             !empty($data) && $dataGroup[] = $data;
         }
-        return $this->insertSql($this->db, $this->table, $dataGroup);
+        return empty($dataGroup) ? false : $this->insertSql($this->db, $this->table, $dataGroup);
     }
 }

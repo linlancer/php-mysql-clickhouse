@@ -15,7 +15,7 @@ class UpdateRowHandler extends BaseEventHandler
     {
         $values = $this->event->getValues();
         $sql = $this->parseSql($values);
-        $this->clickhouseQuery($sql);
+        $sql && $this->clickhouseQuery($sql);
     }
 
     private function parseSql(array $values)
@@ -41,7 +41,7 @@ class UpdateRowHandler extends BaseEventHandler
             $sql = $this->updateSql($this->db, $this->table, $change, $where);
             !empty($change) && $sqlGroup[] = $sql;
         }
-        return $sqlGroup;
+        return empty($sqlGroup) ? false : $sqlGroup;
     }
 
 }
