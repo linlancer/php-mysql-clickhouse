@@ -9,16 +9,12 @@
 namespace LinLancer\PhpMySQLClickhouse\Handler;
 
 
+use LinLancer\PhpMySQLClickhouse\Benchmark;
+
 class UpdateRowHandler extends BaseEventHandler
 {
-    public function handle()
-    {
-        $values = $this->event->getValues();
-        $sql = $this->parseSql($values);
-        $sql && $this->clickhouseQuery($sql);
-    }
 
-    private function parseSql(array $values)
+    public function parseSql(array $values)
     {
         $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
         $primaryKey = $table->getPrimaryKey()->getColumns();

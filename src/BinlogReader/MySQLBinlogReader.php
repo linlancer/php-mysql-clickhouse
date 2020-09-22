@@ -11,6 +11,7 @@ namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 use ClickHouseDB\Client;
 use Doctrine\Common\Cache\Cache;
+use LinLancer\PhpMySQLClickhouse\Benchmark;
 use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\ClickhouseClient;
 use MySQLReplication\BinLog\BinLogCurrent;
@@ -114,7 +115,7 @@ class MySQLBinlogReader
         /** @var BinLogCurrent $binLogCurrent */
         $binLogCurrent = unserialize(self::$cache->fetch(self::CACHE_KEY));
 
-        echo 'starting from file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position' . PHP_EOL;
+        Benchmark::log('starting from file:' . $binLogCurrent->getBinFileName() . ', position:' . $binLogCurrent->getBinLogPosition() . ' bin log position');
 
         return $builder
             ->withBinLogFileName($binLogCurrent->getBinFileName())
@@ -215,5 +216,10 @@ class MySQLBinlogReader
     public function updateTableCache()
     {
         self::$rules = new DatabaseMappingRules(self::$config, self::$cache, self::$clickhouse);
+    }
+
+    public function getConfig()
+    {
+        return self::$config;
     }
 }

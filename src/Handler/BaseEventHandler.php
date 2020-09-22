@@ -9,14 +9,16 @@
 namespace LinLancer\PhpMySQLClickhouse\Handler;
 
 
+use LinLancer\PhpMySQLClickhouse\Benchmark;
 use LinLancer\PhpMySQLClickhouse\BinlogReader\MySQLBinlogReader;
-use LinLancer\PhpMySQLClickhouse\Cache\DatabaseMappingRules;
 use LinLancer\PhpMySQLClickhouse\Clickhouse\TypeMapping;
+use LinLancer\PhpMySQLClickhouse\Task\RedisQueue;
 use MySQLReplication\Event\DTO\EventDTO;
 use MySQLReplication\Event\DTO\RowsDTO;
 
 abstract class BaseEventHandler
 {
+    const QUEUE_PREFIX = 'clickhouse:redis:queue:';
     /**
      * @var string
      */
@@ -31,6 +33,11 @@ abstract class BaseEventHandler
     protected $reader;
 
     /**
+     * @var RedisQueue
+     */
+    protected $queue;
+
+    /**
      * @var EventDTO|RowsDTO
      */
     protected $event;
@@ -39,6 +46,7 @@ abstract class BaseEventHandler
     {
         $this->event = $event;
         $this->reader = MySQLBinlogReader::getInstance();
+        $this->queue = new RedisQueue($this->reader->getConfig()['redis']);
         $this->initEvent();
     }
 
@@ -50,7 +58,16 @@ abstract class BaseEventHandler
         }
     }
 
-    public abstract function handle();
+    public function handle() {
+        $values = $this->event->getValues();
+        $tail = $this->db . ':' . $this->table;
+        $sql = $this->parseSql($values);
+        $delay = time() - $this->event->getEventInfo()->getTimestamp();
+        $date = $this->event->getEventInfo()->getDateTime();
+        $content = sprintf('【主库时间】%s【当前延迟】 %s 秒', $date, $delay);
+        Benchmark::process($content);
+        $this->queue->push(self::QUEUE_PREFIX . $tail, $sql[0]);
+    }
 
     public function updateSql($db, $table, $changes, $conditons)
     {

@@ -9,6 +9,7 @@
 namespace LinLancer\PhpMySQLClickhouse\BinlogReader;
 
 
+use LinLancer\PhpMySQLClickhouse\Benchmark;
 use LinLancer\PhpMySQLClickhouse\Handler\DeleteRowHandler;
 use LinLancer\PhpMySQLClickhouse\Handler\InsertRowHandler;
 use LinLancer\PhpMySQLClickhouse\Handler\UpdateRowHandler;
@@ -24,19 +25,25 @@ class EventsSubscriber extends EventSubscribers
      */
     public function allEvents(EventDTO $event): void
     {
+        /**
+         *
+         */
         $eventType = $event->getType();
         switch ($eventType) {
             case ConstEventsNames::DELETE:
-                echo '【start handling delete events】'.PHP_EOL;
+                Benchmark::start('开始处理删除事件');
                 (new DeleteRowHandler($event))->handle();
+                Benchmark::end('删除完成');
                 break;
             case ConstEventsNames::UPDATE:
-                echo '【start handling update events】'.PHP_EOL;
+                Benchmark::start('开始处理更新事件');
                 (new UpdateRowHandler($event))->handle();
+                Benchmark::end('更新结束');
                 break;
             case ConstEventsNames::WRITE:
-                echo '【start handling insert events】'.PHP_EOL;
+                Benchmark::start('开始处理写入事件');
                 (new InsertRowHandler($event))->handle();
+                Benchmark::end('写入完成');
                 break;
             case ConstEventsNames::QUERY:
                 /**
@@ -44,8 +51,9 @@ class EventsSubscriber extends EventSubscribers
                  */
                 $query = $event->getQuery();
                 if (stripos($query, 'BEGIN') !== 0) {
-                    echo '【fetch ddl and update cache soon】'.PHP_EOL;
+                    Benchmark::start('结构变更');
                     MySQLBinlogReader::getInstance()->updateTableCache();
+                    Benchmark::end('表结构变更');
                 }
                 break;
             default:
