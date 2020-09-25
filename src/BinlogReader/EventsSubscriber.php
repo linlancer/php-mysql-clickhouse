@@ -51,9 +51,7 @@ class EventsSubscriber extends EventSubscribers
                  */
                 $query = $event->getQuery();
                 if (stripos($query, 'BEGIN') !== 0) {
-                    Benchmark::start('结构变更');
-                    MySQLBinlogReader::getInstance()->updateTableCache();
-                    Benchmark::end('表结构变更');
+                    Benchmark::start($query);
                 }
                 break;
             default:

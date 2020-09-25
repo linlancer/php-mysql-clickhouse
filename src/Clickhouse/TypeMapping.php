@@ -90,6 +90,9 @@ class TypeMapping
             case Types::STRING:
             case Types::DECIMAL:
             case Types::TEXT:
+            case Types::JSON:
+                if (strpos($value, '\'') !== false)
+                    $value = str_replace('\'', '\\\'', $value);
                 $value = sprintf('\'%s\'', $value);
                 break;
             case Types::BIGINT:
@@ -101,7 +104,6 @@ class TypeMapping
             case Types::FLOAT:
                 $value = floatval($value);
                 break;
-            case Types::JSON:
             default:
                 break;
         }
