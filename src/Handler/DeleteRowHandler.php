@@ -22,10 +22,11 @@ class DeleteRowHandler extends BaseEventHandler
         foreach ($values as $row) {
             $where = [];
             foreach ($row as $key => $value) {
-                $sourceType = $table->getColumn($key)->getType()->getName();
-
+                $column = $table->getColumn($key);
+                $sourceType = $column->getType()->getName();
+                $unsign = $column->getUnsigned();
                 if ($primaryKeyName == $key)
-                    $where[$key] = $this->convertValue($value, $sourceType);
+                    $where[$key] = $this->convertValue($value, $sourceType, $unsign);
             }
             $sql = $this->deleteSql($this->db, $this->table, $where);
             !empty($where) && $sqlGroup[] = $sql;

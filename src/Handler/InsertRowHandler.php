@@ -22,8 +22,10 @@ class InsertRowHandler extends BaseEventHandler
             foreach ($row as $key => $value) {
                 if ($this->checkClickhouseColumn($this->db, $this->table, $key) === false)
                     continue;
-                $sourceType = $table->getColumn($key)->getType()->getName();
-                $data[$key] = $this->convertValue($value, $sourceType);
+                $column = $table->getColumn($key);
+                $sourceType = $column->getType()->getName();
+                $unsign = $column->getUnsigned();
+                $data[$key] = $this->convertValue($value, $sourceType, $unsign);
             }
 
             !empty($data) && $dataGroup[] = $data;

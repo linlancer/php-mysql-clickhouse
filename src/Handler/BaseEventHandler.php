@@ -130,9 +130,9 @@ CLICKHOUSE_UPDATE_PATTERN;
         return sprintf('`%s`', $field);
     }
 
-    public function convertValue($value, $sourceType)
+    public function convertValue($value, $sourceType, $unsign = false)
     {
-        return TypeMapping::convert($value, $sourceType);
+        return TypeMapping::convert($value, $sourceType, $unsign);
     }
 
     /**

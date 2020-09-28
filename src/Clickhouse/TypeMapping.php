@@ -78,7 +78,7 @@ class TypeMapping
         self::MYSQL_JSON => self::CLICKHOUSE_ARRAY,
     ];
 
-    public static function convert($value, $type)
+    public static function convert($value, $type, $unsign = false)
     {
         switch ($type) {
             case Types::DATE_MUTABLE:
@@ -96,10 +96,20 @@ class TypeMapping
                 $value = sprintf('\'%s\'', $value);
                 break;
             case Types::BIGINT:
+                $value = intval($value);
+                $value = $unsign ? sprintf('toUInt64(%d)', $value) : $value;
+                break;
             case Types::INTEGER:
+                $value = intval($value);
+                $value = $unsign ? sprintf('toUInt32(%d)', $value) : $value;
+                break;
             case Types::SMALLINT:
+                $value = intval($value);
+                $value = $unsign ? sprintf('toUInt16(%d)', $value) : $value;
+                break;
             case Types::BOOLEAN:
                 $value = intval($value);
+                $value = $unsign ? sprintf('toUInt8(%d)', $value) : $value;
                 break;
             case Types::FLOAT:
                 $value = floatval($value);
