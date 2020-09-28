@@ -12,7 +12,7 @@ namespace LinLancer\PhpMySQLClickhouse\Handler;
 class DeleteRowHandler extends BaseEventHandler
 {
 
-    public function parseSql(array $values)
+    public function parseSql(array $values): string
     {
         $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
         $primaryKey = $table->getPrimaryKey()->getColumns();
@@ -30,6 +30,6 @@ class DeleteRowHandler extends BaseEventHandler
             $sql = $this->deleteSql($this->db, $this->table, $where);
             !empty($where) && $sqlGroup[] = $sql;
         }
-        return empty($sqlGroup) ? false : $sqlGroup;
+        return empty($sqlGroup) ? false : $sqlGroup[0];
     }
 }

@@ -66,7 +66,7 @@ abstract class BaseEventHandler
         $date = $this->event->getEventInfo()->getDateTime();
         $content = sprintf('【主库时间】%s【当前延迟】 %s 秒', $date, $delay);
         Benchmark::process($content);
-        $this->queue->push(self::QUEUE_PREFIX . $tail, $sql[0]);
+        $this->queue->push(self::QUEUE_PREFIX . $tail, $sql);
     }
 
     public function updateSql($db, $table, $changes, $conditons)
@@ -185,5 +185,7 @@ CLICKHOUSE_UPDATE_PATTERN;
             return explode('.', $rules[$db . '.' . $table]);
         }
     }
+
+    public abstract function parseSql(array $values): string;
 
 }

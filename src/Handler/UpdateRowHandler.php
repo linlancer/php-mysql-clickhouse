@@ -9,12 +9,10 @@
 namespace LinLancer\PhpMySQLClickhouse\Handler;
 
 
-use LinLancer\PhpMySQLClickhouse\Benchmark;
-
 class UpdateRowHandler extends BaseEventHandler
 {
 
-    public function parseSql(array $values)
+    public function parseSql(array $values):string
     {
         $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
         $primaryKey = $table->getPrimaryKey()->getColumns();
@@ -37,7 +35,7 @@ class UpdateRowHandler extends BaseEventHandler
             $sql = $this->updateSql($this->db, $this->table, $change, $where);
             !empty($change) && $sqlGroup[] = $sql;
         }
-        return empty($sqlGroup) ? false : $sqlGroup;
+        return empty($sqlGroup) ? false : $sqlGroup[0];
     }
 
 }

@@ -12,7 +12,7 @@ namespace LinLancer\PhpMySQLClickhouse\Handler;
 class InsertRowHandler extends BaseEventHandler
 {
 
-    public function parseSql(array $values)
+    public function parseSql(array $values): string
     {
         $table = $this->reader->getTableRules()->getMysqlTable($this->db, $this->table);
 
