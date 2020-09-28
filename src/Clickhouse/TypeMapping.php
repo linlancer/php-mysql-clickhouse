@@ -82,10 +82,10 @@ class TypeMapping
     {
         switch ($type) {
             case Types::DATE_MUTABLE:
-                $value = sprintf('toDateOrNull(\'%s\')', $value);
+                $value = sprintf('toDateOrZero(\'%s\')', $value);
                 break;
             case Types::DATETIME_MUTABLE:
-                $value = sprintf('toDateTimeOrNull(\'%s\')', $value);
+                $value = sprintf('toDateTimeOrZero(\'%s\')', $value);
                 break;
             case Types::STRING:
             case Types::DECIMAL:
@@ -97,19 +97,19 @@ class TypeMapping
                 break;
             case Types::BIGINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt64(%d)', $value) : $value;
+                $value = $unsign ? sprintf('toUInt64(%d)', $value) : sprintf('toInt64(%d)', $value);
                 break;
             case Types::INTEGER:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt32(%d)', $value) : $value;
+                $value = $unsign ? sprintf('toUInt32(%d)', $value) : sprintf('toInt32(%d)', $value);
                 break;
             case Types::SMALLINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt16(%d)', $value) : $value;
+                $value = $unsign ? sprintf('toUInt16(%d)', $value) : sprintf('toInt16(%d)', $value);
                 break;
             case Types::BOOLEAN:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt8(%d)', $value) : $value;
+                $value = $unsign ? sprintf('toUInt8(%d)', $value) : sprintf('toInt8(%d)', $value);
                 break;
             case Types::FLOAT:
                 $value = floatval($value);
