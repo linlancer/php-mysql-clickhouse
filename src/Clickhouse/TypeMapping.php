@@ -97,19 +97,19 @@ class TypeMapping
                 break;
             case Types::BIGINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt64(%d)', $value) : sprintf('toInt64(%d)', $value);
+                $value = $unsign ? sprintf('toUInt64(%s)', $value) : sprintf('toInt64(%s)', $value);
                 break;
             case Types::INTEGER:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt32(%d)', $value) : sprintf('toInt32(%d)', $value);
+                $value = $unsign ? sprintf('toUInt32(%s)', $value) : sprintf('toInt32(%s)', $value);
                 break;
             case Types::SMALLINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt16(%d)', $value) : sprintf('toInt16(%d)', $value);
+                $value = $unsign ? sprintf('toUInt16(%s)', $value) : sprintf('toInt16(%s)', $value);
                 break;
             case Types::BOOLEAN:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt8(%d)', $value) : sprintf('toInt8(%d)', $value);
+                $value = $unsign ? sprintf('toUInt8(%s)', $value) : sprintf('toInt8(%s)', $value);
                 break;
             case Types::FLOAT:
                 $value = floatval($value);

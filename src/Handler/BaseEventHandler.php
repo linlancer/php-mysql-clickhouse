@@ -66,7 +66,8 @@ abstract class BaseEventHandler
         $date = $this->event->getEventInfo()->getDateTime();
         $content = sprintf('【主库时间】%s【当前延迟】 %s 秒', $date, $delay);
         Benchmark::process($content);
-        $this->queue->push(self::QUEUE_PREFIX . $tail, $sql);
+        if (!empty($sql))
+            $this->queue->push(self::QUEUE_PREFIX . $tail, $sql);
     }
 
     public function updateSql($db, $table, $changes, $conditons)
@@ -88,7 +89,7 @@ abstract class BaseEventHandler
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             ALTER TABLE `$db`.`$table` UPDATE $columns WHERE $condition;
 CLICKHOUSE_UPDATE_PATTERN;
-        return $sql;
+        return trim($sql);
     }
 
     public function insertSql($db, $table, $data)
@@ -105,7 +106,7 @@ CLICKHOUSE_UPDATE_PATTERN;
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             INSERT INTO `$db`.`$table` $columns VALUES $values;
 CLICKHOUSE_UPDATE_PATTERN;
-        return $sql;
+        return trim($sql);
     }
 
     public function deleteSql($db, $table, $conditons)
@@ -122,7 +123,7 @@ CLICKHOUSE_UPDATE_PATTERN;
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             ALTER TABLE `$db`.`$table` DELETE WHERE $condition;
 CLICKHOUSE_UPDATE_PATTERN;
-        return $sql;
+        return trim($sql);
     }
 
     private function quoteField($field)

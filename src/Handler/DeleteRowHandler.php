@@ -31,6 +31,6 @@ class DeleteRowHandler extends BaseEventHandler
             $sql = $this->deleteSql($this->db, $this->table, $where);
             !empty($where) && $sqlGroup[] = $sql;
         }
-        return empty($sqlGroup) ? false : $sqlGroup[0];
+        return empty($sqlGroup) ? '' : ($sqlGroup[0] ?? '');
     }
 }

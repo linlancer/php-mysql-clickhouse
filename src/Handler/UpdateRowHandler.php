@@ -46,7 +46,7 @@ class UpdateRowHandler extends BaseEventHandler
             $sql = $this->updateSql($this->db, $this->table, $change, $where);
             !empty($change) && $sqlGroup[] = $sql;
         }
-        return empty($sqlGroup) ? false : $sqlGroup[0];
+        return empty($sqlGroup) ? false : ($sqlGroup[0] ?? '');
     }
 
 }

@@ -30,6 +30,6 @@ class InsertRowHandler extends BaseEventHandler
 
             !empty($data) && $dataGroup[] = $data;
         }
-        return empty($dataGroup) ? false : $this->insertSql($this->db, $this->table, $dataGroup);
+        return empty($dataGroup) ? '' : $this->insertSql($this->db, $this->table, $dataGroup);
     }
 }
