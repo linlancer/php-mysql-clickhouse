@@ -197,7 +197,7 @@ class MySQLBinlogReader
     /**
      * @param $config
      */
-    private function initClickhouseClient($config)
+    public function initClickhouseClient($config)
     {
         $clickhouseConfig = $config['clickhouse_database'];
         $config = [
@@ -221,5 +221,10 @@ class MySQLBinlogReader
     public function getConfig()
     {
         return self::$config;
+    }
+
+    public function setConfig(array $config)
+    {
+        return self::$config = $config;
     }
 }
