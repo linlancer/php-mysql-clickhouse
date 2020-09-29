@@ -89,7 +89,7 @@ abstract class BaseEventHandler
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             ALTER TABLE `$db`.`$table` UPDATE $columns WHERE $condition;
 CLICKHOUSE_UPDATE_PATTERN;
-        return trim($sql);
+        return base64_encode(trim($sql));
     }
 
     public function insertSql($db, $table, $data)
@@ -106,7 +106,7 @@ CLICKHOUSE_UPDATE_PATTERN;
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             INSERT INTO `$db`.`$table` $columns VALUES $values;
 CLICKHOUSE_UPDATE_PATTERN;
-        return trim($sql);
+        return base64_encode(trim($sql));
     }
 
     public function deleteSql($db, $table, $conditons)
@@ -123,7 +123,7 @@ CLICKHOUSE_UPDATE_PATTERN;
         $sql = <<<CLICKHOUSE_UPDATE_PATTERN
             ALTER TABLE `$db`.`$table` DELETE WHERE $condition;
 CLICKHOUSE_UPDATE_PATTERN;
-        return trim($sql);
+        return base64_encode(trim($sql));
     }
 
     private function quoteField($field)
