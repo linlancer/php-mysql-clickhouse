@@ -80,6 +80,7 @@ class TypeMapping
 
     public static function convert($value, $type, $unsign = false)
     {
+        $value = is_null($value) ? $value : addslashes($value);
         switch ($type) {
             case Types::DATE_MUTABLE:
                 $value = sprintf('toDateOrZero(\'%s\')', $value);
@@ -88,28 +89,28 @@ class TypeMapping
                 $value = sprintf('toDateTimeOrZero(\'%s\')', $value);
                 break;
             case Types::STRING:
-            case Types::DECIMAL:
             case Types::TEXT:
             case Types::JSON:
-                if (strpos($value, '\'') !== false)
-                    $value = str_replace('\'', '\\\'', $value);
                 $value = sprintf('\'%s\'', $value);
+                break;
+            case Types::DECIMAL:
+                $value = is_null($value) ? null : sprintf('\'%s\'', $value);
                 break;
             case Types::BIGINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt64(%s)', $value) : sprintf('toInt64(%s)', $value);
+                $value = $unsign ? $value : sprintf('toInt64(%s)', $value);
                 break;
             case Types::INTEGER:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt32(%s)', $value) : sprintf('toInt32(%s)', $value);
+                $value = $unsign ? $value : sprintf('toInt32(%s)', $value);
                 break;
             case Types::SMALLINT:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt16(%s)', $value) : sprintf('toInt16(%s)', $value);
+                $value = $unsign ? $value : sprintf('toInt16(%s)', $value);
                 break;
             case Types::BOOLEAN:
                 $value = intval($value);
-                $value = $unsign ? sprintf('toUInt8(%s)', $value) : sprintf('toInt8(%s)', $value);
+                $value = $unsign ? $value : sprintf('toInt8(%s)', $value);
                 break;
             case Types::FLOAT:
                 $value = floatval($value);
